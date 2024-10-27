@@ -1,0 +1,41 @@
+version: "3.3"
+services:
+  
+  discovery:
+    build: C:\Users\HP\projet\Discovery
+    ports:
+      - "8084:8761" 
+    image: "eureka" 
+
+  candidat:
+    build: C:\Users\HP\projet\Candidat
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka/
+    ports:
+      - "8082:9000"
+    image: "candidate-service" 
+    depends_on:
+      - discovery
+
+  mysql:
+    image: "mysql:5.6"
+    environment:
+      - MYSQL_USERNAME=root
+      - MYSQL_ROOT_PASSWOR=root
+      - MYSQL_DATABASE=jobTest
+    ports:
+      - "9010:3306"
+
+  job:
+    build: C:\Users\HP\projet\job
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/jobTest?autoReconnect=true&useSSL=false   
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+    ports:
+      - "8083:9010"
+    image: "job-service"
+    depends_on:
+      - discovery
+      - mysql
